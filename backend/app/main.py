@@ -30,3 +30,5 @@ def handle_command(body: CommandRequest):
         return CommandResponse(ok=True, output=output, model=settings.OPENAI_MODEL)
     except Exception as e:
         raise HTTPException(status_code=500, detail="internal_error") from e
+
+
