@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* you can keep these niceties */
+@layer base {
+  html, body, #root { height: 100%; }
+  html, body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+}
