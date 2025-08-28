@@ -2,17 +2,26 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUp, Minus, X, Maximize2, Moon, Sun } from "lucide-react";
 
-/** --- tiny API helper --- **/
+/** --- Tiny API helper via background --- **/
 type Action = "explain" | "rephrase" | "answer";
-const API_BASE = (import.meta as { env?: { VITE_API_BASE?: string } }).env?.VITE_API_BASE || "http://127.0.0.1:8787";
+
+function bgFetch(path: string, init: { method: string; headers: Record<string, string>; body: unknown }) {
+  return new Promise<{ ok: boolean; status?: number; body?: string; error?: string }>((resolve) => {
+    chrome.runtime.sendMessage(
+      { type: "ONTAPAI_FETCH", path, method: init.method, headers: init.headers, body: init.body },
+      (resp) => resolve(resp || { ok: false, error: "no_response" })
+    );
+  });
+}
+
 async function runCommand(params: { input: string; action: Action; url?: string; tone?: string }) {
-  const res = await fetch(`${API_BASE}/api/commands`, {
+  const resp = await bgFetch("/api/commands", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(params),
+    body: params,
   });
-  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text().catch(() => res.statusText)}`);
-  return (await res.json()) as { ok: true; output: string; model: string };
+  if (!resp.ok) throw new Error(resp.error || `API ${resp.status}`);
+  return JSON.parse(resp.body || "{}") as { ok: true; output: string; model: string };
 }
 
 /** --- types --- **/

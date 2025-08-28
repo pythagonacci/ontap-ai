@@ -4,16 +4,15 @@ export default defineManifest({
   manifest_version: 3,
   name: "Ontap AI – Command Palette",
   version: "0.0.1",
-  description:
-    "A liquid-glass command palette on any page. Toggle with a shortcut and ask /explain, /answer, /rewrite.",
+  description: "Liquid-glass command palette on any page.",
   permissions: ["scripting", "activeTab"],
-  host_permissions: ["<all_urls>"],
+  host_permissions: [
+    "http://127.0.0.1:8787/*",   // <— your API in dev
+    // add prod API here later, e.g. "https://api.yoursite.com/*"
+  ],
   action: { default_title: "Ontap AI" },
   commands: {
-    "toggle-palette": {
-      suggested_key: { default: "Alt+K" },
-      description: "Toggle Ontap AI Command Palette",
-    },
+    "toggle-palette": { suggested_key: { default: "Alt+K" }, description: "Toggle palette" },
   },
   background: { service_worker: "src/extension/background.ts", type: "module" },
   content_scripts: [
