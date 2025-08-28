@@ -5,12 +5,39 @@ import { ArrowUp, Minus, X, Maximize2, Moon, Sun } from "lucide-react";
 /** --- Tiny API helper via background --- **/
 type Action = "explain" | "rephrase" | "answer";
 
-function bgFetch(path: string, init: { method: string; headers: Record<string, string>; body: unknown }) {
-  return new Promise<{ ok: boolean; status?: number; body?: string; error?: string }>((resolve) => {
-    chrome.runtime.sendMessage(
-      { type: "ONTAPAI_FETCH", path, method: init.method, headers: init.headers, body: init.body },
-      (resp) => resolve(resp || { ok: false, error: "no_response" })
-    );
+function bgSend<T = any>(msg: any) {
+  return new Promise<T>((resolve) => {
+    try {
+      chrome.runtime.sendMessage(msg, (resp) => {
+        if (chrome.runtime.lastError) {
+          console.warn("[CS] lastError:", chrome.runtime.lastError.message);
+          // @ts-ignore
+          resolve({ ok: false, error: chrome.runtime.lastError.message });
+          return;
+        }
+        // @ts-ignore
+        resolve(resp);
+      });
+    } catch (e: any) {
+      // @ts-ignore
+      resolve({ ok: false, error: e?.message || String(e) });
+    }
+  });
+}
+
+async function bgPing() {
+  const r = await bgSend<{ ok: boolean; ts?: number; error?: string }>({ type: "PING_BG" });
+  console.log("[CS] PING_BG resp:", r);
+  return r;
+}
+
+function bgFetch(path: string, init: any) {
+  return bgSend<{ ok: boolean; status?: number; body?: string; error?: string }>({
+    type: "ONTAPAI_FETCH",
+    path,
+    method: init?.method || "GET",
+    headers: init?.headers || {},
+    body: init?.body ?? undefined,
   });
 }
 
@@ -83,6 +110,11 @@ export default function CommandPalettePrototype() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // call once when component mounts
+  useEffect(() => {
+    bgPing();
   }, []);
 
 
