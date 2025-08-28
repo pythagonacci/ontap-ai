@@ -133,10 +133,12 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
   const endRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, open, expanded]);
 
-     /** hover state for command strip */
-   const [headerHover, setHeaderHover] = useState(false);
-   const [controlsHover, setControlsHover] = useState(false);
-   const showCmdStrip = msgs.length > 0 && headerHover && !controlsHover;
+  /** hover state for command strip */
+  const [headerHover, setHeaderHover] = useState(false);
+  const [controlsHover, setControlsHover] = useState(false);
+
+  // show strip only when: there are msgs, header hovered, and not over the traffic-light controls
+  const showCmdStrip = msgs.length > 0 && headerHover && !controlsHover;
 
   /** ---------- WRAPPER ---------- */
   return (
@@ -181,40 +183,60 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
               onMouseLeave={() => setHeaderHover(false)}
               className="sticky top-0 z-30 flex items-center gap-2 px-4 pt-3 pb-2 select-none cursor-grab active:cursor-grabbing bg-transparent"
             >
-                             <div
-                 onMouseEnter={() => setControlsHover(true)}
-                 onMouseLeave={() => setControlsHover(false)}
-                 className="flex items-center gap-2 relative z-50"
-               >
-                 <button onClick={()=>setOpen(false)} className="h-4 w-4 rounded-full bg-red-400/80 flex items-center justify-center"><X className="h-3 w-3 text-white" /></button>
-                 <button onClick={()=>setOpen(false)} className="h-4 w-4 rounded-full bg-amber-400/80 flex items-center justify-center"><Minus className="h-3 w-3 text-white" /></button>
-                 <button onClick={()=>setExpanded(e=>!e)} className="h-4 w-4 rounded-full bg-gray-400/80 flex items-center justify-center"><Maximize2 className="h-3 w-3 text-white" /></button>
-               </div>
+              <div
+                onMouseEnter={() => setControlsHover(true)}
+                onMouseLeave={() => setControlsHover(false)}
+                className="flex items-center gap-2 relative z-50"
+              >
+                <button onClick={() => setOpen(false)} className="h-4 w-4 rounded-full bg-red-400/80 flex items-center justify-center">
+                  <X className="h-3 w-3 text-white" />
+                </button>
+                <button onClick={() => setOpen(false)} className="h-4 w-4 rounded-full bg-amber-400/80 flex items-center justify-center">
+                  <Minus className="h-3 w-3 text-white" />
+                </button>
+                <button onClick={() => setExpanded(e => !e)} className="h-4 w-4 rounded-full bg-gray-400/80 flex items-center justify-center">
+                  <Maximize2 className="h-3 w-3 text-white" />
+                </button>
+              </div>
               <div className="ml-3 text-[13px] dark:text-gray-200 text-gray-600">Command Palette</div>
             </div>
 
-                         {/* Hover strip */}
-             {showCmdStrip && (
-               <div className="absolute top-0 left-0 right-0 z-40 py-2 dark:bg-black/98 bg-white/98 backdrop-blur-md">
-                 <div className="flex justify-center items-center gap-6 text-[13px]">
-                   {["/explain","/answer","/rewrite"].map(c=>(
-                     <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }}
-                       className="underline underline-offset-4 decoration-1 dark:decoration-gray-400 hover:decoration-blue-500 cursor-pointer">
-                       {c}
-                     </button>
-                   ))}
-                 </div>
-               </div>
-             )}
+            {/* Hover strip (centered pill that avoids the buttons area) */}
+            {showCmdStrip && (
+              <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none">
+                <div className="w-full flex justify-center mt-0">
+                  <div
+                    className="pointer-events-auto py-2 px-4 rounded-full shadow-sm dark:bg-black/98 bg-white/98 backdrop-blur-md"
+                    onMouseEnter={() => setHeaderHover(true)}
+                    onMouseLeave={() => setHeaderHover(false)}
+                  >
+                    <div className="flex justify-center items-center gap-6 text-[13px]">
+                      {["/explain", "/answer", "/rewrite"].map(c => (
+                        <button
+                          key={c}
+                          onClick={() => { setActiveCmd(c); setQuery(`${c}: `); }}
+                          className="underline underline-offset-4 decoration-1 dark:decoration-gray-400 hover:decoration-blue-500 cursor-pointer"
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Messages area */}
             <div className="flex-1 min-h-0 overflow-y-auto rounded-xl p-2">
               {msgs.length === 0 ? (
                 <div className="h-full flex flex-col justify-center items-center">
                   <div className="flex gap-8 text-[14px]">
-                    {["/explain","/answer","/rewrite"].map(c=>(
-                      <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }}
-                        className="underline underline-offset-4 decoration-1 hover:decoration-blue-500">
+                    {["/explain", "/answer", "/rewrite"].map(c => (
+                      <button
+                        key={c}
+                        onClick={() => { setActiveCmd(c); setQuery(`${c}: `); }}
+                        className="underline underline-offset-4 decoration-1 hover:decoration-blue-500"
+                      >
                         {c}
                       </button>
                     ))}
@@ -224,12 +246,14 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
               ) : (
                 <div className="space-y-3">
                   {msgs.map(m => (
-                    <div key={m.id} className={`flex ${m.role==="user"?"justify-end":"justify-start"}`}>
-                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-6 border backdrop-blur ${
-                        m.role==="user"
-                          ? "bg-gray-200/80 dark:bg-gray-600/30"
-                          : "bg-white/70 dark:bg-white/6"
-                      }`}>
+                    <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-6 border backdrop-blur ${
+                          m.role === "user"
+                            ? "bg-gray-200/80 dark:bg-gray-600/30"
+                            : "bg-white/70 dark:bg-white/6"
+                        }`}
+                      >
                         {m.content}
                       </div>
                     </div>
@@ -239,26 +263,28 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
               )}
             </div>
 
-                         {/* Input */}
-             <div className="relative mt-4 flex-shrink-0 px-6">
-               <input
-                 value={query}
-                 onChange={e=>setQuery(e.target.value)}
-                 onKeyDown={e=>{ if (e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); onSubmit(); } }}
-                 placeholder="Ask a question or choose a command…"
-                 className="w-full rounded-[999px] px-4 py-3 pr-12 border-gray-300 dark:border-gray-600 shadow-inner focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 focus:outline-none"
-               />
-               <button onClick={onSubmit}
-                 className="absolute right-9 top-1/2 -translate-y-1/2 rounded-full p-2 bg-black/80 text-white">
-                 <ArrowUp className={`h-4 w-4 ${loading ? "animate-pulse":""}`} />
-               </button>
-             </div>
-             
-                           {/* Footer area with more space */}
-              <div className="mt-4 pb-6 flex-shrink-0">
-                {loading && <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Working…</div>}
-                {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
-              </div>
+            {/* Input */}
+            <div className="relative mt-4 flex-shrink-0 px-6">
+              <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(); } }}
+                placeholder="Ask a question or choose a command…"
+                className="w-full rounded-[999px] px-4 py-3 pr-12 border-gray-300 dark:border-gray-600 shadow-inner focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 focus:outline-none"
+              />
+              <button
+                onClick={onSubmit}
+                className="absolute right-9 top-1/2 -translate-y-1/2 rounded-full p-2 bg-black/80 text-white"
+              >
+                <ArrowUp className={`h-4 w-4 ${loading ? "animate-pulse" : ""}`} />
+              </button>
+            </div>
+
+            {/* Footer area with more space */}
+            <div className="mt-4 pb-6 flex-shrink-0">
+              {loading && <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Working…</div>}
+              {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
