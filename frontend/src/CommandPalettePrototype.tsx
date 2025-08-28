@@ -58,7 +58,7 @@ async function runCommand(params: { input: string; action: Action; url?: string;
 }
 
 export default function CommandPalettePrototype({ embedded = true }: { embedded?: boolean }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeCmd, setActiveCmd] = useState<string | null>(null);
   const [darkMode] = useState(false);
@@ -254,7 +254,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
                         <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }} className="bg-transparent p-0 m-0 border-0 cursor-pointer pl-3 underline underline-offset-4 decoration-1 dark:decoration-gray-500 hover:decoration-blue-500 focus:outline-none">{c}</button>
                       ))}
                     </div>
-                    <div className="text-center text-xs font-light dark:text-gray-400 text-gray-500">Start by choosing a command or just type your question.</div>
+                    <div className="text-center text-xs font-light dark:text-gray-400 text-gray-500 mt-6">Start by choosing a command or just type your question.</div>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -284,7 +284,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
                   onChange={e=>setQuery(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(); } }}
                   placeholder="Ask a question or choose a command…"
-                  className="w-full rounded-[999px] border shadow-inner backdrop-blur-2xl px-4 py-3 pr-12 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-400/60
+                  className="w-full rounded-[999px] border shadow-inner backdrop-blur-2xl px-4 py-3 pr-14 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-400/60
                              dark:bg-white/10 dark:border-white/20 dark:text-gray-100 dark:placeholder:text-gray-400
                              bg-white/20 border-white/30 text-gray-900 placeholder:text-gray-600"
                 />
@@ -292,7 +292,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
                   aria-label="Submit"
                   onClick={onSubmit}
                   disabled={loading}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 bg-black/80 text-white shadow hover:opacity-90 disabled:opacity-60"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 bg-black/80 text-white shadow hover:opacity-90 disabled:opacity-60 flex items-center justify-center"
                 >
                   <ArrowUp className={`h-4 w-4 ${loading ? "animate-pulse" : ""}`} />
                 </button>
