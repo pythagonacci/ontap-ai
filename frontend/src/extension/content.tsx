@@ -1,48 +1,69 @@
-// src/extension/content.tsx
+// content.tsx — shadow mount with scoped focus/key shields
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import CommandPalettePrototype from "../CommandPalettePrototype";
 import cssText from "../index.css?inline";
 
+// Host + shadow (delegatesFocus so clicks move focus into shadow inputs)
 const host = document.createElement("div");
 host.id = "ontapai-root-host";
-host.style.cssText = `
-  position: fixed;
-  inset: 0;
-  z-index: 2147483647;
-  pointer-events: none; /* page stays interactive */
-`;
+host.style.cssText = "position:fixed; inset:0; z-index:2147483647; pointer-events:none;";
+const shadow = host.attachShadow({ mode: "open", delegatesFocus: true });
 document.documentElement.appendChild(host);
 
-const shadow = host.attachShadow({ mode: "open" });
-
-const baseSheet = new CSSStyleSheet();
-baseSheet.replaceSync(`:host,*{box-sizing:border-box} :host{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Arial}`);
+// Styles
+const base = new CSSStyleSheet();
+base.replaceSync(`:host, :host * { box-sizing: border-box; }`);
 const tailwind = new CSSStyleSheet();
 tailwind.replaceSync(cssText);
-shadow.adoptedStyleSheets = [baseSheet, tailwind];
+shadow.adoptedStyleSheets = [base, tailwind];
 
+// Mount: IMPORTANT → pointer-events:none so the page is clickable outside panel
 const mount = document.createElement("div");
 mount.id = "ontapai-root";
-/* ⬇️ only window gets clicks; the full-screen mount does not */
 mount.style.cssText = "pointer-events:none; width:100%; height:100%;";
 shadow.appendChild(mount);
 
-function togglePalette() {
-  // allow either Cmd+K (Mac) or Ctrl+K (Win)
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-  window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+// Helper: is the event inside our palette panel?
+function isInsidePanel(evt: Event) {
+  const path = evt.composedPath?.() || [];
+  return path.some(
+    (n) => n instanceof Element && n.getAttribute("data-ontapai-panel") === "1"
+  );
 }
 
-chrome.runtime.onMessage.addListener((msg: any, _s, send) => {
-  if (msg?.type === "PING") { send({ ok: true }); return true; }
-  if (msg?.type === "TOGGLE_PALETTE") { togglePalette(); return true; }
+// Capture-phase shields ONLY when inside the panel
+["keydown", "keypress", "keyup", "beforeinput", "input"].forEach((type) => {
+  document.addEventListener(
+    type,
+    (e) => {
+      if (isInsidePanel(e)) e.stopImmediatePropagation();
+    },
+    true // capture
+  );
+});
+
+document.addEventListener(
+  "wheel",
+  (e) => {
+    if (isInsidePanel(e)) e.stopImmediatePropagation();
+  },
+  { capture: true, passive: true }
+);
+
+// Message bridge
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg?.type === "PING") return true;
+  if (msg?.type === "TOGGLE_PALETTE") {
+    const ev = new KeyboardEvent("keydown", { key: "k", ctrlKey: true });
+    window.dispatchEvent(ev);
+  }
   return false;
 });
 
-const root = createRoot(mount);
-root.render(
+// Render
+createRoot(mount).render(
   <StrictMode>
-    <CommandPalettePrototype embedded />
+    <CommandPalettePrototype />
   </StrictMode>
 );

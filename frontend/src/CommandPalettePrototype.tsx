@@ -78,7 +78,6 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
   /** drag controls: drag only from header so scroll works everywhere else */
   const dragControls = useDragControls();
   const startDrag = (e: React.PointerEvent) => {
-    // only start drag on primary button
     if (e.button !== 0) return;
     dragControls.start(e);
   };
@@ -134,7 +133,12 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
   const endRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, open, expanded]);
 
-  /** ---------- WRAPPER: embedded floats, page untouched ---------- */
+     /** hover state for command strip */
+   const [headerHover, setHeaderHover] = useState(false);
+   const [controlsHover, setControlsHover] = useState(false);
+   const showCmdStrip = msgs.length > 0 && headerHover && !controlsHover;
+
+  /** ---------- WRAPPER ---------- */
   return (
     <div
       ref={themeRef}
@@ -149,14 +153,12 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
       <AnimatePresence>
         {open && (
           <motion.div
-            /** draggable panel — drag starts only from header */
             drag={!expanded}
             dragListener={false}
             dragControls={dragControls}
             dragMomentum={false}
             dragElastic={0.12}
-            /** critical for scroll: allow children to overflow */
-            className={`pointer-events-auto transform-gpu min-h-0 ${
+            className={`pointer-events-auto transform-gpu min-h-0 group ${
               expanded
                 ? "fixed top-6 right-6 h-[min(90vh,calc(100vh-48px))] w-[min(760px,52vw)]"
                 : "relative h-[min(600px,80vh)] w-[min(420px,85vw)]"
@@ -166,146 +168,97 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
               backdrop-blur-[28px] saturate-150 shadow-[0_10px_30px_rgba(0,0,0,0.10)]
               overflow-hidden flex flex-col transition-[background,box-shadow,border-color] duration-300`}
             role="dialog" aria-modal
-            initial={{ opacity: 0, scale: 0.48, x: -180, y: 180, rotate: -10, skewX: -6, clipPath: "inset(70% 55% 15% 70% round 24px)" }}
-            animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0, skewX: 0, clipPath: expanded ? "inset(0% 0% 0% 0% round 20px)" : "inset(0% 0% 0% 0% round 24px)" }}
-            exit={{ opacity: 0, scale: 0.48, x: -180, y: 180, rotate: -10, skewX: -6, clipPath: "inset(70% 55% 15% 70% round 24px)" }}
+            initial={{ opacity: 0, scale: 0.48, x: -180, y: 180, rotate: -10, skewX: -6 }}
+            animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0, skewX: 0 }}
+            exit={{ opacity: 0, scale: 0.48, x: -180, y: 180, rotate: -10, skewX: -6 }}
             transition={{ type: "spring", stiffness: 600, damping: 40, mass: 0.3 }}
-            style={{ willChange: "transform, opacity, clipPath", transformOrigin: "bottom left" }}
+            style={{ willChange: "transform, opacity", transformOrigin: "bottom left" }}
           >
-            {/* LIQUID GLASS layers */}
-            <motion.div
-              initial={{ x: -500, y: -80, rotate: -4, opacity: 0 }}
-              animate={{ x: [-500,-250,0,250,500], y: [-80,-40,0,40,80], rotate: [-4,-2,0,2,4], opacity: [0,.25,.4,.25,0] }}
-              transition={{ duration: 18, ease: "easeInOut", repeat: Infinity }}
-              className="pointer-events-none absolute -left-1/3 inset-y-0 w-3/4 -skew-x-12
-                         dark:[background:linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.36)_50%,rgba(255,255,255,0)_100%)]
-                         [background:linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.28)_50%,rgba(255,255,255,0)_100%)]
-                         [filter:blur(22px)]"
-            />
-            <motion.div initial={{opacity:.12}} animate={{opacity:[.12,.2,.12]}} transition={{duration:12,repeat:Infinity,ease:"easeInOut"}} className="pointer-events-none absolute inset-0">
-              {[
-                { sx:"-10%", sy:"20%", size:160, pathX:[-30,-10,20,0,-20,-30], pathY:[0,8,-6,-10,-4,0] },
-                { sx:"60%", sy:"-10%", size:120, pathX:[0,-15,-30,-15,0], pathY:[0,6,12,6,0] },
-                { sx:"30%", sy:"70%", size:180, pathX:[0,15,30,15,0,-15], pathY:[0,-6,-12,-6,0,6] },
-              ].map((b,i)=>(
-                <motion.div key={i}
-                  initial={{x:0,y:0,scale:1}}
-                  animate={{x:b.pathX,y:b.pathY,scale:[1,1.03,0.97,1.02,1]}}
-                  transition={{duration:16+i*4,repeat:Infinity,ease:"easeInOut"}}
-                  className="absolute rounded-full [filter:blur(20px)]
-                             dark:[background:radial-gradient(60%_60%_at_50%_50%,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.07)_45%,rgba(255,255,255,0)_70%)]
-                             [background:radial-gradient(60%_60%_at_50%_50%,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.15)_45%,rgba(255,255,255,0)_70%)]"
-                  style={{left:b.sx,top:b.sy,width:b.size,height:b.size}}
-                />
-              ))}
-            </motion.div>
-            <motion.div
-              initial={{x:-360,opacity:.1}}
-              animate={{x:360,opacity:[.1,.05,.1]}}
-              transition={{duration:20,ease:"easeInOut",repeat:Infinity,repeatType:"mirror"}}
-              className="pointer-events-none absolute inset-0 -skew-x-6
-                         dark:[background:linear-gradient(60deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.06)_40%,rgba(255,255,255,0)_80%)]
-                         [background:linear-gradient(60deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.14)_30%,rgba(255,255,255,0.06)_60%,rgba(255,255,255,0)_90%)]"
-            />
-
-            {/* Header (drag handle + internal controls) */}
+            {/* Header */}
             <div
               onPointerDown={startDrag}
-              className="sticky top-0 z-30 flex items-center gap-2 px-4 pt-3 pb-2 select-none cursor-grab active:cursor-grabbing
-                         bg-transparent backdrop-blur-[1px]"
+              onMouseEnter={() => setHeaderHover(true)}
+              onMouseLeave={() => setHeaderHover(false)}
+              className="sticky top-0 z-30 flex items-center gap-2 px-4 pt-3 pb-2 select-none cursor-grab active:cursor-grabbing bg-transparent"
             >
-              <div className="flex items-center gap-2">
-                <button aria-label="Close" onClick={()=>setOpen(false)} className="h-4 w-4 rounded-full bg-red-400/80 shadow-inner flex items-center justify-center text-[10px] text-white/90"><X className="h-3 w-3" /></button>
-                <div className="h-4 w-4 rounded-full bg-amber-400/80 shadow-inner flex items-center justify-center text-[10px] text-white/90"><Minus className="h-3 w-3" /></div>
-                <button aria-label={expanded?"Restore":"Maximize"} onClick={()=>setExpanded(e=>!e)} className="h-4 w-4 rounded-full bg-emerald-400/80 shadow-inner flex items-center justify-center text-[10px] text-white/90" title={expanded?"Restore size":"Expand to side"}><Maximize2 className="h-3 w-3" /></button>
-              </div>
-
-              <div className="ml-3 h-6 w-px dark:bg-white/40 bg-white/40" />
-              <div className="text-[13px] dark:text-gray-200 text-gray-600">Command Palette</div>
-
-                              <div className="ml-auto flex items-center gap-3">
-                  <div className="text-[11px] dark:text-gray-300 text-gray-600 hidden sm:block" title="Keyboard shortcut">
-                    ⌘K / Ctrl+K
-                  </div>
-                </div>
-            </div>
-
-                         {/* Body (make sure this column can shrink and the scroller gets space) */}
-             <div className={`${expanded?"px-6 pb-6 pt-2":"px-5 pb-5 pt-3"} flex-1 min-h-0 flex flex-col`}>
-               {/* Hover commands row – appears over header with heavy opacity */}
-               {msgs.length > 0 && (
-                 <div className="absolute top-0 left-0 right-0 z-40">
-                   <div className="py-3.5 dark:bg-black/90 bg-white/90 backdrop-blur-md opacity-0 hover:opacity-100 transition-opacity duration-200">
-                     <div className="flex justify-center items-center select-none text-[13px] gap-8 tracking-wider dark:text-gray-200 text-gray-700">
-                       {["/explain","/answer","/rewrite"].map(c=>(
-                         <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }} className="bg-transparent p-0 m-0 border-0 cursor-pointer underline underline-offset-4 decoration-1 dark:decoration-gray-400 hover:decoration-blue-500 focus:outline-none">{c}</button>
-                       ))}
-                     </div>
-                   </div>
-                 </div>
-               )}
-
-              {/* Messages (the ONLY scroll container) */}
-              <div className="flex-1 min-h-0 overflow-y-auto rounded-xl p-2 pr-1">
-                {msgs.length === 0 ? (
-                  <div className="h-full flex flex-col justify-center items-center">
-                    <div className="flex justify-center items-center select-none text-[14px] gap-10 tracking-wider mb-0 dark:text-gray-100 text-gray-800">
-                      {["/explain","/answer","/rewrite"].map(c=>(
-                        <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }} className="bg-transparent p-0 m-0 border-0 cursor-pointer pl-3 underline underline-offset-4 decoration-1 dark:decoration-gray-500 hover:decoration-blue-500 focus:outline-none">{c}</button>
-                      ))}
-                    </div>
-                    <div className="text-center text-xs font-light dark:text-gray-400 text-gray-500 mt-6">Start by choosing a command or just type your question.</div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {msgs.map(m => (
-                      <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-6 border backdrop-blur select-text cursor-text ${
-                            m.role === "user"
-                              ? "dark:bg-gray-600/30 dark:border-gray-500/40 dark:text-gray-100 bg-gray-200/80 border-gray-300/60 text-gray-800"
-                              : "dark:bg-white/6 dark:border-white/15 dark:text-gray-100 bg-white/70 border-white/50 text-gray-900"
-                          }`}
-                          style={{ whiteSpace: "pre-wrap" }}
-                        >
-                          {m.content}
-                        </div>
-                      </div>
-                    ))}
-                    <div ref={endRef} />
-                  </div>
-                )}
-              </div>
-
-              {/* Input */}
-              <div className="relative mt-4 flex-shrink-0">
-                <input
-                  value={query}
-                  onChange={e=>setQuery(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(); } }}
-                  placeholder="Ask a question or choose a command…"
-                  className="w-full rounded-[999px] border shadow-inner backdrop-blur-2xl px-4 py-3 pr-14 text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-400/60
-                             dark:bg-white/10 dark:border-white/20 dark:text-gray-100 dark:placeholder:text-gray-400
-                             bg-white/20 border-white/30 text-gray-900 placeholder:text-gray-600"
-                />
-                <button
-                  aria-label="Submit"
-                  onClick={onSubmit}
-                  disabled={loading}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 bg-black/80 text-white shadow hover:opacity-90 disabled:opacity-60 flex items-center justify-center"
-                >
-                  <ArrowUp className={`h-4 w-4 ${loading ? "animate-pulse" : ""}`} />
-                </button>
-              </div>
-
-                             {/* Footer line */}
-               <div className="mt-2 text-xs h-5 flex-shrink-0">
-                 {loading && <span className="dark:text-gray-300 text-gray-600">Working…</span>}
-                 {error && <span className="text-red-600">{error}</span>}
+                             <div
+                 onMouseEnter={() => setControlsHover(true)}
+                 onMouseLeave={() => setControlsHover(false)}
+                 className="flex items-center gap-2 relative z-50"
+               >
+                 <button onClick={()=>setOpen(false)} className="h-4 w-4 rounded-full bg-red-400/80 flex items-center justify-center"><X className="h-3 w-3 text-white" /></button>
+                 <button onClick={()=>setOpen(false)} className="h-4 w-4 rounded-full bg-amber-400/80 flex items-center justify-center"><Minus className="h-3 w-3 text-white" /></button>
+                 <button onClick={()=>setExpanded(e=>!e)} className="h-4 w-4 rounded-full bg-gray-400/80 flex items-center justify-center"><Maximize2 className="h-3 w-3 text-white" /></button>
                </div>
-
-               
+              <div className="ml-3 text-[13px] dark:text-gray-200 text-gray-600">Command Palette</div>
             </div>
+
+                         {/* Hover strip */}
+             {showCmdStrip && (
+               <div className="absolute top-0 left-0 right-0 z-40 py-2 dark:bg-black/98 bg-white/98 backdrop-blur-md">
+                 <div className="flex justify-center items-center gap-6 text-[13px]">
+                   {["/explain","/answer","/rewrite"].map(c=>(
+                     <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }}
+                       className="underline underline-offset-4 decoration-1 dark:decoration-gray-400 hover:decoration-blue-500 cursor-pointer">
+                       {c}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+            {/* Messages area */}
+            <div className="flex-1 min-h-0 overflow-y-auto rounded-xl p-2">
+              {msgs.length === 0 ? (
+                <div className="h-full flex flex-col justify-center items-center">
+                  <div className="flex gap-8 text-[14px]">
+                    {["/explain","/answer","/rewrite"].map(c=>(
+                      <button key={c} onClick={()=>{ setActiveCmd(c); setQuery(`${c}: `); }}
+                        className="underline underline-offset-4 decoration-1 hover:decoration-blue-500">
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-6">Start by choosing a command or just type.</div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {msgs.map(m => (
+                    <div key={m.id} className={`flex ${m.role==="user"?"justify-end":"justify-start"}`}>
+                      <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-6 border backdrop-blur ${
+                        m.role==="user"
+                          ? "bg-gray-200/80 dark:bg-gray-600/30"
+                          : "bg-white/70 dark:bg-white/6"
+                      }`}>
+                        {m.content}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={endRef} />
+                </div>
+              )}
+            </div>
+
+                         {/* Input */}
+             <div className="relative mt-4 flex-shrink-0 px-6">
+               <input
+                 value={query}
+                 onChange={e=>setQuery(e.target.value)}
+                 onKeyDown={e=>{ if (e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); onSubmit(); } }}
+                 placeholder="Ask a question or choose a command…"
+                 className="w-full rounded-[999px] px-4 py-3 pr-12 border-gray-300 dark:border-gray-600 shadow-inner focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 focus:outline-none"
+               />
+               <button onClick={onSubmit}
+                 className="absolute right-9 top-1/2 -translate-y-1/2 rounded-full p-2 bg-black/80 text-white">
+                 <ArrowUp className={`h-4 w-4 ${loading ? "animate-pulse":""}`} />
+               </button>
+             </div>
+             
+                           {/* Footer area with more space */}
+              <div className="mt-4 pb-6 flex-shrink-0">
+                {loading && <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Working…</div>}
+                {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
+              </div>
           </motion.div>
         )}
       </AnimatePresence>
