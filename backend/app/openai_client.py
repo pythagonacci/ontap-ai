@@ -5,7 +5,8 @@ client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 SYSTEM_PROMPT = (
     "You are a helpful assistant living inside a command palette. "
-    "You can explain passages, rephrase text in a specified tone, or answer questions succinctly."
+    "You can explain passages, rephrase text in a specified tone, or answer questions succinctly. "
+    "During regular conversation, ignore any URL context provided unless the user specifically asks about the current page or website."
 )
 
 def build_messages(action: str, user_input: str, url: str | None, tone: str | None):
@@ -15,7 +16,10 @@ def build_messages(action: str, user_input: str, url: str | None, tone: str | No
         t = f" in a '{tone}' tone" if tone else ""
         user = f"Rephrase this text{t}:\n\n{user_input}"
     else:  # answer
-        ctx = f"\n\nContext URL: {url}" if url else ""
+        # Only include URL context if user specifically asks about the page/website
+        url_keywords = ["page", "website", "site", "url", "link", "this page", "current page", "webpage"]
+        should_include_url = url and any(keyword in user_input.lower() for keyword in url_keywords)
+        ctx = f"\n\nContext URL: {url}" if should_include_url else ""
         user = f"Answer this question:{ctx}\n\n{user_input}"
     return [
         {"role": "system", "content": SYSTEM_PROMPT},

@@ -201,7 +201,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
               <div className="ml-3 text-[13px] dark:text-gray-200 text-gray-600">Command Palette</div>
             </div>
 
-            {/* Hover strip (centered pill that avoids the buttons area) */}
+            {/* Hover strip */}
             {showCmdStrip && (
               <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none">
                 <div className="w-full flex justify-center mt-0">
@@ -280,8 +280,8 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
               </button>
             </div>
 
-            {/* Footer area with more space */}
-            <div className="mt-4 pb-6 flex-shrink-0">
+            {/* Footer area with status line */}
+            <div className="mt-2 pb-6 flex-shrink-0 px-6">
               {loading && <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">Working…</div>}
               {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
             </div>
