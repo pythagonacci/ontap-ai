@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     PORT: int = 8787
-    CORS_ORIGINS: str = "http://localhost:5173"
+    CORS_ORIGINS: str = "http://localhost:5173,chrome-extension://*"
 
     OPENAI_API_KEY: str
     OPENAI_MODEL: str = "gpt-4o-mini"
