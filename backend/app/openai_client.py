@@ -25,11 +25,19 @@ def build_messages(action: str, user_input: str, url: str | None, tone: str | No
     ]
 
 def run_chat_completion(action: str, user_input: str, url: str | None, tone: str | None) -> str:
-    local_client = OpenAI(api_key=settings.OPENAI_API_KEY)
-    resp = local_client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=build_messages(action, user_input, url, tone),
-        temperature=0.3,
-        max_tokens=800,
-    )
-    return resp.choices[0].message.content or ""
+    try:
+        # Initialize client with minimal parameters to avoid proxies issue
+        local_client = OpenAI(
+            api_key=settings.OPENAI_API_KEY,
+            base_url="https://api.openai.com/v1"
+        )
+        resp = local_client.chat.completions.create(
+            model=settings.OPENAI_MODEL,
+            messages=build_messages(action, user_input, url, tone),
+            temperature=0.3,
+            max_tokens=800,
+        )
+        return resp.choices[0].message.content or ""
+    except Exception as e:
+        print(f"OpenAI client error: {str(e)}")
+        raise e
