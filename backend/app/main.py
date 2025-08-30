@@ -7,39 +7,21 @@ from .settings import settings
 
 app = FastAPI(title="ontap-ai backend", version="0.1.0")
 
-# Rate limiting
-request_times = []
-MAX_REQUESTS_PER_MINUTE = 3  # Match free tier
-
-def check_rate_limit():
-    """Simple rate limiter using sliding window"""
-    global request_times
-    current_time = time.time()
-    
-    # Remove requests older than 1 minute
-    request_times = [t for t in request_times if current_time - t < 60]
-    
-    # Check if we're over the limit
-    if len(request_times) >= MAX_REQUESTS_PER_MINUTE:
-        raise HTTPException(
-            status_code=429, 
-            detail=f"Rate limit exceeded. Maximum {MAX_REQUESTS_PER_MINUTE} requests per minute."
-        )
-    
-    # Add current request
-    request_times.append(current_time)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.origins,
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.get("/")
+def root():
+    return {"message": "Ontap AI API", "status": "running", "endpoints": ["/health", "/api/commands"]}
+
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"status": "healthy"}
 
 @app.post("/api/commands", response_model=CommandResponse)
 def handle_command(body: CommandRequest):
@@ -48,9 +30,6 @@ def handle_command(body: CommandRequest):
         if not settings.OPENAI_API_KEY:
             raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
         
-        # Check rate limit
-        check_rate_limit()
-
         output = run_chat_completion(
             action=body.action,
             user_input=body.input,
