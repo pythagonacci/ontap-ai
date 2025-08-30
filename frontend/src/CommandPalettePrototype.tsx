@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { ArrowUp, Minus, X, Maximize2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 /** --- types / helpers --- */
 type Action = "explain" | "rephrase" | "answer";
@@ -254,7 +255,9 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
                             : "bg-white/70 dark:bg-white/6"
                         }`}
                       >
-                        {m.content}
+                        <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-p:leading-6 prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-em:italic prose-em:text-gray-700 dark:prose-em:text-gray-300 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-3 prose-pre:rounded-lg prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-h1:font-bold prose-h2:font-semibold prose-h3:font-medium">
+                          <ReactMarkdown>{m.content}</ReactMarkdown>
+                        </div>
                       </div>
                     </div>
                   ))}
