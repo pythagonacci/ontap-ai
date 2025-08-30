@@ -1,4 +1,5 @@
-from openai import OpenAI
+import httpx
+import json
 from .settings import settings
 
 SYSTEM_PROMPT = (
@@ -26,18 +27,29 @@ def build_messages(action: str, user_input: str, url: str | None, tone: str | No
 
 def run_chat_completion(action: str, user_input: str, url: str | None, tone: str | None) -> str:
     try:
-        # Initialize client with minimal parameters to avoid proxies issue
-        local_client = OpenAI(
-            api_key=settings.OPENAI_API_KEY,
-            base_url="https://api.openai.com/v1"
-        )
-        resp = local_client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=build_messages(action, user_input, url, tone),
-            temperature=0.3,
-            max_tokens=800,
-        )
-        return resp.choices[0].message.content or ""
+        headers = {
+            "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "model": settings.OPENAI_MODEL,
+            "messages": build_messages(action, user_input, url, tone),
+            "temperature": 0.3,
+            "max_tokens": 800
+        }
+        
+        with httpx.Client() as client:
+            response = client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=30.0
+            )
+            response.raise_for_status()
+            result = response.json()
+            return result["choices"][0]["message"]["content"] or ""
+            
     except Exception as e:
-        print(f"OpenAI client error: {str(e)}")
+        print(f"OpenAI API error: {str(e)}")
         raise e
