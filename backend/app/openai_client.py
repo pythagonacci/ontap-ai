@@ -8,7 +8,9 @@ from .models import Message
 SYSTEM_PROMPT = (
     "You are a helpful assistant living inside a command palette. "
     "You can explain passages, rephrase text in a specified tone, or answer questions succinctly. "
-    "During regular conversation, ignore any URL context provided unless the user specifically asks about the current page or website."
+    "During regular conversation, ignore any URL context provided unless the user specifically asks about the current page or website. "
+    "IMPORTANT: Maintain conversation context and flow naturally. If a user's message seems incomplete or like a continuation of a previous thought, "
+    "connect it to the conversation history and respond appropriately. Don't ask for clarification unless absolutely necessary."
 )
 
 def build_messages(action: str, user_input: str, url: str | None, tone: str | None, conversation_history: list[Message] | None = None):
@@ -27,11 +29,16 @@ def build_messages(action: str, user_input: str, url: str | None, tone: str | No
         t = f" in a '{tone}' tone" if tone else ""
         user = f"Rephrase this text{t}:\n\n{user_input}"
     else:  # answer
-        # Only include URL context if user specifically asks about the page/website
-        url_keywords = ["page", "website", "site", "url", "link", "this page", "current page", "webpage"]
-        should_include_url = url and any(keyword in user_input.lower() for keyword in url_keywords)
-        ctx = f"\n\nContext URL: {url}" if should_include_url else ""
-        user = f"Answer this question:{ctx}\n\n{user_input}"
+        # For conversational flow, don't wrap in prefixes if there's history
+        if conversation_history:
+            # Natural conversation - just use the user input directly
+            user = user_input
+        else:
+            # First message - can add context if needed
+            url_keywords = ["page", "website", "site", "url", "link", "this page", "current page", "webpage"]
+            should_include_url = url and any(keyword in user_input.lower() for keyword in url_keywords)
+            ctx = f"\n\nContext URL: {url}" if should_include_url else ""
+            user = f"Answer this question:{ctx}\n\n{user_input}"
     
     messages.append({"role": "user", "content": user})
     return messages
