@@ -47,7 +47,7 @@ function bgFetch(path: string, init: any) {
     body: init?.body ?? undefined,
   });
 }
-async function runCommand(params: { input: string; action: Action; url?: string; tone?: string }) {
+async function runCommand(params: { input: string; action: Action; url?: string; tone?: string; messages?: Msg[] }) {
   const resp = await bgFetch("/api/commands", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -119,7 +119,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
     try {
       const action = inferAction(activeCmd);
       const url = window.location.href;
-      const { output } = await runCommand({ input: cleaned, action, url });
+      const { output } = await runCommand({ input: cleaned, action, url, messages: msgs });
       const botMsg: Msg = { id: newId(), role: "assistant", content: output, ts: Date.now() };
       setMsgs(m => [...m, botMsg]);
     } catch (e: any) {
