@@ -4,7 +4,7 @@ export default defineManifest({
   manifest_version: 3,
   name: "Ontap AI – Command Palette",
   version: "0.0.1",
-  description: "Liquid-glass command palette on any page.",
+  description: "Access ChatGPT on any page as a transparent overlay. No more switching tabs.",
   icons: {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
