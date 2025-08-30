@@ -1,5 +1,5 @@
 // BACKGROUND (MV3 service worker)
-const API_BASE = (import.meta as any).env?.VITE_API_BASE || "http://127.0.0.1:8000";
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || "https://ontap-ai.onrender.com";
 console.log("[BG] booted. API_BASE =", API_BASE);
 
 // simple reachability ping

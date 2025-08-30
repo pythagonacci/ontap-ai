@@ -6,7 +6,7 @@ export async function runCommand(params: {
   url?: string;
   tone?: string;
 }) {
-  const base = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+  const base = import.meta.env.VITE_API_BASE || "https://ontap-ai.onrender.com";
   const res = await fetch(`${base}/api/commands`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -7,8 +7,7 @@ export default defineManifest({
   description: "Liquid-glass command palette on any page.",
   permissions: ["scripting", "activeTab"],
   host_permissions: [
-    "http://127.0.0.1:8000/*",   // <— your API in dev
-    // add prod API here later, e.g. "https://api.yoursite.com/*"
+    "https://ontap-ai.onrender.com/*",   // <— production API
   ],
   action: { default_title: "Ontap AI" },
   commands: {
