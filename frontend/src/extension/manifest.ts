@@ -5,11 +5,25 @@ export default defineManifest({
   name: "Ontap AI – Command Palette",
   version: "0.0.1",
   description: "Liquid-glass command palette on any page.",
+  icons: {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   permissions: ["scripting", "activeTab"],
   host_permissions: [
     "https://ontap-ai.onrender.com/*",   // <— production API
   ],
-  action: { default_title: "Ontap AI" },
+  action: { 
+    default_title: "Ontap AI",
+    default_icon: {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
   commands: {
     "toggle-palette": { suggested_key: { default: "Alt+K" }, description: "Toggle palette" },
   },
