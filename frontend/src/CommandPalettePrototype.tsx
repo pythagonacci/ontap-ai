@@ -160,7 +160,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
             dragControls={dragControls}
             dragMomentum={false}
             dragElastic={0.12}
-            className={`pointer-events-auto transform-gpu min-h-0 group ${
+            className={`pointer-events-auto transform-gpu min-h-0 group font-sans ${
               expanded
                 ? "fixed top-6 right-6 h-[min(90vh,calc(100vh-48px))] w-[min(760px,52vw)]"
                 : "relative h-[min(600px,80vh)] w-[min(420px,85vw)]"
@@ -227,7 +227,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
             )}
 
             {/* Messages area */}
-            <div className="flex-1 min-h-0 overflow-y-auto rounded-xl p-2">
+            <div className="flex-1 min-h-0 overflow-y-auto rounded-xl p-2 font-sans">
               {msgs.length === 0 ? (
                 <div className="h-full flex flex-col justify-center items-center">
                   <div className="flex gap-8 text-[14px]">
@@ -270,7 +270,7 @@ export default function CommandPalettePrototype({ embedded = true }: { embedded?
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSubmit(); } }}
                 placeholder="Ask a question or choose a command…"
-                className="w-full rounded-[999px] px-4 py-3 pr-12 border-gray-300 dark:border-gray-600 shadow-inner focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 focus:outline-none"
+                className="w-full rounded-[999px] px-4 py-3 pr-12 border-gray-300 dark:border-gray-600 shadow-inner focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 focus:outline-none font-sans"
               />
               <button
                 onClick={onSubmit}
