@@ -4,15 +4,15 @@
 
 Ontap AI is a powerful Chrome extension that brings AI assistance directly to your browser. With a sleek command palette interface, you can get instant help with text explanation, rephrasing, and answering questions without leaving your current webpage.
 
-## ✨ Features
+## Features
 
-- **🎯 Seamless Integration** - Works on any website with a transparent overlay
-- **⚡ Instant Access** - Press `Alt+K` to open the command palette anywhere
-- **🤖 AI-Powered** - Powered by OpenAI's GPT models for intelligent responses
-- **🔒 Privacy-Focused** - Minimal data collection, no personal information stored
-- **🎨 Beautiful UI** - Modern, responsive design that doesn't interfere with your browsing
+- **Seamless Integration** - Works on any website with a transparent overlay
+- **Instant Access** - Press `Alt+K` to open the command palette anywhere
+- **AI-Powered** - Powered by OpenAI's GPT models for intelligent responses
+- **Privacy-Focused** - Minimal data collection, no personal information stored
+- **Beautiful UI** - Modern, responsive design that doesn't interfere with your browsing
 
-## 🚀 Quick Start
+## Quick Start
 
 ### For End Users (Install Extension)
 
@@ -69,7 +69,7 @@ npm run build
 # The dist/ folder contains your extension
 ```
 
-## 🛠️ Development
+## Development
 
 ### Project Structure
 ```
@@ -106,12 +106,12 @@ npm run lint         # Run ESLint
 npm run preview      # Preview production build
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 Create a `.env` file in the backend directory:
 ```env
-OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_API_KEY=your-api-key-here
 OPENAI_MODEL=gpt-4o-mini
 PORT=8787
 CORS_ORIGINS=http://localhost:5173,chrome-extension://*
@@ -122,7 +122,7 @@ The extension requests minimal permissions:
 - **`activeTab`**: Access current webpage context when requested
 - **Host permissions**: Communicate with the AI backend service
 
-## 🚀 Deployment
+## Deployment
 
 ### Backend Deployment
 The backend is designed to work with services like:
@@ -136,7 +136,7 @@ The backend is designed to work with services like:
 2. **Direct installation** using the installer zip
 3. **GitHub releases** for developer distribution
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -144,7 +144,7 @@ The backend is designed to work with services like:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -156,11 +156,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **OpenAI API integration** follows their privacy standards
 - **Chrome extension best practices** for security
 
-## 📞 Support
+## Support
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/ontap-ai/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/ontap-ai/discussions)
-- **Email**: [Your Email]
+- **Email**: aahmadamna@gmail.com
 
 ---
 
