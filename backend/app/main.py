@@ -28,7 +28,7 @@ def handle_command(body: CommandRequest):
     try:
         # Check if API key is set
         if not settings.OPENAI_API_KEY:
-            raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
+            raise HTTPException(status_code=500, detail="Service temporarily unavailable")
         
         output = run_chat_completion(
             action=body.action,
@@ -39,9 +39,10 @@ def handle_command(body: CommandRequest):
         )
         return CommandResponse(ok=True, output=output, model=settings.OPENAI_MODEL)
     except Exception as e:
+        # Log the actual error for debugging but return generic message
         print(f"Error in handle_command: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"internal_error: {str(e)}") from e
+        raise HTTPException(status_code=500, detail="Service temporarily unavailable") from e
 
 

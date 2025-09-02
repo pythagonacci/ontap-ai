@@ -26,7 +26,6 @@ Your data is used solely for:
 
 ## Permissions
 The extension requires:
-- **scripting**: To inject the command palette interface
 - **activeTab**: To access current webpage context when requested
 - **Host permission**: To communicate with our AI service
 
